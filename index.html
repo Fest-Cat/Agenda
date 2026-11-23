@@ -467,6 +467,19 @@ function renderStrip(up){
       skew += (Math.max(-7, Math.min(7, -vel * 0.35)) - skew) * 0.18;
       root.style.setProperty("--vsk", (skew * 0.7).toFixed(2) + "deg");
     }
+    const hhPx = parseFloat(getComputedStyle(root).getPropertyValue("--hh")) || 62;
+    document.querySelectorAll(".month-head").forEach(mh => {
+      const hr = mh.getBoundingClientRect();
+      const sec = mh.closest(".month");
+      let over = false;
+      if(sec && hr.bottom > hhPx && hr.top <= hhPx + 24){
+        sec.querySelectorAll(".card").forEach(c => {
+          const cr = c.getBoundingClientRect();
+          if(cr.top < hr.bottom && cr.bottom > hr.top) over = true;
+        });
+      }
+      mh.classList.toggle("over-card", over);
+    });
     if(Math.abs(vel) > 0 || Math.abs(skew) > 0.05) requestAnimationFrame(frame); else running = false;
   }
   function onScroll(){ if(!running){ running = true; requestAnimationFrame(frame); } }
