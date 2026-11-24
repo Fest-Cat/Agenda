@@ -360,6 +360,18 @@ function loadAgenda(){
     return;
   }
 
+  let hasCached = false;
+  try{
+    const raw = sessionStorage.getItem("festcat_events_v1");
+    if(raw){
+      const cached = JSON.parse(raw);
+      if(Array.isArray(cached) && cached.length){
+        hasCached = true;
+        finishLoad(cached.map(toEvent));
+      }
+    }
+  }catch(_){}
+
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 15000);
 
@@ -371,12 +383,13 @@ function loadAgenda(){
     .then(data => {
       clearTimeout(timer);
       if(!data || !data.ok || !Array.isArray(data.events)) throw new Error("Resposta no vàlida");
+      try{ sessionStorage.setItem("festcat_events_v1", JSON.stringify(data.events)); }catch(_){}
       finishLoad(data.events.map(toEvent));
     })
     .catch(err => {
       clearTimeout(timer);
       console.error("FestCat:", err);
-      showMaintenance();
+      if(!hasCached) showMaintenance();
     });
 }
 
